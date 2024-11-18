@@ -17,6 +17,20 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+# Load Balancer for Network
+resource "aws_lb" "test" {
+  name               = "test-lb-tf"
+  internal           = false
+  load_balancer_type = "network"
+  subnets            = [for subnet in aws_subnet.public_subnets : subnet.id]
+
+  enable_deletion_protection = true
+
+  tags = {
+    Environment = "development"
+  }
+}
+
 # Deploy Private Subnets
 resource "aws_subnet" "private_subnets" {
   for_each          = var.private_subnets

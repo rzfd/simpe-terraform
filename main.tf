@@ -55,7 +55,7 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-# Create Private Route Tables
+# Create Private Route Table
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.vpc.id
   route {

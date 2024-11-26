@@ -7,6 +7,13 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
 
+# reused data 
+locals {
+  team        = "api_manag_dev"
+  application = "corp_api"
+  server_name = "ec2-${var.environment}-${var.variable_sub_az}"
+}
+
 # Define VPC
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
@@ -14,6 +21,8 @@ resource "aws_vpc" "vpc" {
     Name        = var.vpc_name
     Environment = "demo-environment"
     Terraform   = "true"
+    # Implementing Data Source
+    Region      = data.aws_region.current.name
   }
 }
 
@@ -121,5 +130,75 @@ resource "aws_nat_gateway" "nat_gateway" {
   subnet_id     = aws_subnet.public_subnets["public_subnet_1"].id
   tags = {
     Name = "demo_nat_gateway"
+  }
+}
+
+# Define aws AMI data resource
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  owners = ["008971666708"]
+}
+
+resource "aws_instance" "web" {
+  ami                    = "ami-0aebec83a182ea7ea"
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.public_subnets["public_subnet_1"].id
+  vpc_security_group_ids = ["sg-0a1b147eb160d6204"]
+  tags = {
+    Name  = local.server_name
+    Owner = local.team
+    App   = local.application
+  }
+}
+
+resource "aws_s3_bucket" "my-new-S3-bucket" {
+  bucket = "my-new-bucket-terops12"
+  tags = {
+    Name    = "My S3 Bucket"
+    Purpose = "Intro to Lab"
+  }
+}
+
+resource "aws_s3_bucket_acl" "my-new-S3-bucket-acl" {
+  bucket = aws_s3_bucket.my-new-S3-bucket.id
+  acl    = "private"
+}
+
+resource "aws_security_group" "my-new-group_security" {
+  name        = "web-server-inbound"
+  description = "Inbound at tcp/443"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    description = "Allow 443 from the internet"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "web-server-inbound"
+    Purpose = "to manage server inbound"
+  }
+}
+
+resource "aws_subnet" "variables_subnet" {
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.variable_sub_cidr
+  availability_zone       = var.variable_sub_az
+  map_public_ip_on_launch = var.variable_sub_auto_ip
+
+  tags = {
+    Name      = "sub-variables-${var.variable_sub_az}"
+    Terraform = "true"
   }
 }

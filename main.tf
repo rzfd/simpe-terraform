@@ -22,7 +22,7 @@ resource "aws_vpc" "vpc" {
     Environment = "demo-environment"
     Terraform   = "true"
     # Implementing Data Source
-    Region      = data.aws_region.current.name
+    Region = data.aws_region.current.name
   }
 }
 
@@ -134,18 +134,18 @@ resource "aws_nat_gateway" "nat_gateway" {
 }
 
 # Define aws AMI data resource
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-  owners = ["008971666708"]
-}
+# data "aws_ami" "ubuntu" {
+#   most_recent = true
+#   filter {
+#     name   = "name"
+#     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-24.04-amd64-server-*"]
+#   }
+#   filter {
+#     name   = "virtualization-type"
+#     values = ["hvm"]
+#   }
+#   owners = ["008971666708"]
+# }
 
 resource "aws_instance" "web" {
   ami                    = "ami-0aebec83a182ea7ea"

@@ -17,3 +17,13 @@ output "vpc_information" {
   description = "VPC information about env"
   value       = "Your ${aws_vpc.vpc.tags.Environment} VPC has an ID of ${aws_vpc.vpc.id}"
 }
+
+output "vpc_ubuntuserver" {
+  description = "VPC for web server"
+  value = "Your VPC web server is ${aws_instance.ubuntu_server.arn}"
+}
+
+output "vpc_webserver" {
+  description = "VPC for web server"
+  value = "Your VPC web server is ${aws_instance.web_server.arn}"
+}
